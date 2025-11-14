@@ -22,7 +22,7 @@ import numpy as np
 import statistics
 #import xgboost
 #import pmdarima as pm
-from google import genai
+#from google import genai
 import ssl
 #from dotenv import load_dotenv, dotenv_values 
 #load_dotenv() 
