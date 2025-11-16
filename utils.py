@@ -10,22 +10,30 @@ import warnings
 import random
 import plotly.express as px
 import plotly.graph_objects as go
-#import geopandas as gpd
-#import folium
 import pickle
-#from pycaret.classification import *
-#import pymysql
 import json
 import datetime
 import time
-import numpy as np
 import statistics
+import matplotlib
+import ssl
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+import scipy
+import sklearn
+from sklearn.linear_model import LinearRegression
+#import geopandas as gpd
+#import folium
+#from pycaret.classification import *
+#import pymysql
 #import xgboost
 #import pmdarima as pm
 #from google import genai
-import ssl
 #from dotenv import load_dotenv, dotenv_values 
 #load_dotenv() 
+
+
+
 
 """
 App Information
