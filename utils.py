@@ -38,7 +38,7 @@ from sklearn.linear_model import LinearRegression
 """
 App Information
 """
-APP_NAME = 'GR CUP Analytics'
+APP_NAME = 'Toyota Gazoo Racing (GR) Analytics'
 ABOUT_HEADER = 'About'
 DRIVER_HEADER = 'Driver Insights'
 PRE_RACE_HEADER = "Pre Event Analytics"
