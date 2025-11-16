@@ -57,7 +57,7 @@ def select_race(racename,race_number):
             file_lap_start = load_data('data/Race 2/COTA_lap_start_time_R2.csv')
             final_lap_ms = load_data('data/Race 2/COTA_lap_time_R2.csv')
     elif racename == "Indianapolis":
-        if race_number = "Race 1":
+        if race_number == "Race 1":
             file_results_official = load_data('data/Race 1/03_GR Cup Race 1 Official Results.CSV')
             file_result_provisional = load_data('data/Race 1/03_Provisional Results_Race 1.CSV')
             file_results_official_class = load_data('data/Race 1/05_GR Cup Race 1 Official Results by Class.CSV')
@@ -161,9 +161,6 @@ def select_race(racename,race_number):
             file_lap_start = load_data('data/Race 2/vir_lap_start_R2.csv')
             final_lap_ms = load_data('data/Race 2/vir_lap_time_R2.csv')
     return file_analysis, file_best10, final_lap_ms, file_weather, file_lap_end, file_result_provisional,file_result_provisional_class, file_results_official,file_results_official_class, file_lap_start
-
-
-
 
 
 
