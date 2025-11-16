@@ -9,12 +9,12 @@ def load_data(DATA_URL):
     return data
 
 # Race data
-RACE_NAMES = ["Barber","COTA",'Road America','Sebring','Sonoma','VIR']
+RACE_TRACK_NAME = ["Barber Motorsports Park","Circuit of the Americas","Indianapolis",'Road America','Sebring','Sonoma','Virginia International Raceway']
 RACE_NUMBERS = ['Race 1','Race 2']
 
 def select_race(racename,race_number):
     """Select race data based on race name and number."""
-    if racename == "Barber":
+    if racename == "Barber Motorsports Park":
         if racename == "Race 1":
             file_result_provisional = load_data('data/Race 1/03_Provisional Results_Race 1_Anonymized.CSV')
             file_result_provisional_class = load_data('data/Race 1/05_Provisional Results by Class_Race 1_Anonymized.CSV')
@@ -36,7 +36,7 @@ def select_race(racename,race_number):
             file_lap_start = load_data('data/Race 2/R2_barber_lap_start.csv')
             final_lap_ms = load_data('data/Race 2/R2_barber_lap_time.csv')
 
-    elif racename == "COTA":
+    elif racename == "Circuit of the Americas":
         if race_number == "Race 1":
             file_results_official = load_data('data/Race 1/00_Results GR Cup Race 1 Official_Anonymized.CSV')
             file_result_provisional = load_data('data/Race 1/03_Provisional Results_Race 1_Anonymized.CSV')
@@ -56,6 +56,29 @@ def select_race(racename,race_number):
             file_lap_end = load_data('data/Race 2/COTA_lap_end_time_R2.csv')
             file_lap_start = load_data('data/Race 2/COTA_lap_start_time_R2.csv')
             final_lap_ms = load_data('data/Race 2/COTA_lap_time_R2.csv')
+    elif racename == "Indianapolis":
+        if race_number = "Race 1":
+            file_results_official = load_data('data/Race 1/03_GR Cup Race 1 Official Results.CSV')
+            file_result_provisional = load_data('data/Race 1/03_Provisional Results_Race 1.CSV')
+            file_results_official_class = load_data('data/Race 1/05_GR Cup Race 1 Official Results by Class.CSV')
+            file_result_provisional_class = load_data('data/Race 1/05_Provisional Results by Class_Race 1.CSV')
+            file_analysis = load_data('data/Race 1/23_AnalysisEnduranceWithSections_Race 1.CSV')
+            file_weather = load_data('data/Race 1/26_Weather_Race 1.CSV')
+            file_best10 = load_data('data/Race 1/99_Best 10 Laps By Driver_Race 1.CSV')
+            file_lap_end = load_data('data/Race 1/R1_indianapolis_motor_speedway_lap_end.csv')
+            file_lap_start = load_data('data/Race 1/R1_indianapolis_motor_speedway_lap_start.csv')
+            final_lap_ms = load_data('data/Race 1/R1_indianapolis_motor_speedway_lap_time.csv')
+        else:
+            file_results_official = load_data('data/Race 2/03_GR Cup Race 2 Official Results.CSV')
+            file_result_provisional = load_data('data/Race 2/03_Provisional Results_Race 2.CSV')
+            file_results_official_class = load_data('data/Race 2/05_GR Cup Race 2 Official Results by Class.CSV')
+            file_result_provisional_class = load_data('data/Race 2/05_Provisionals Results by Class_Race 2.CSV')
+            file_analysis = load_data('data/Race 2/23_AnalysisEnduranceWithSections_Race 2.CSV')
+            file_weather = load_data('data/Race 2/26_Weather_Race 2.CSV')
+            file_best10 = load_data('data/Race 2/99_Best 10 Laps By Driver_Race 2.CSV')
+            file_lap_end = load_data('data/Race 2/R2_indianapolis_motor_speedway_lap_end.csv')
+            file_lap_start = load_data('data/Race 2/R2_indianapolis_motor_speedway_lap_start.csv')
+            final_lap_ms = load_data('data/Race 2/R2_indianapolis_motor_speedway_lap_time.csv')
     elif racename == "Road America":
         if race_number == "Race 1":
             file_result_provisional = load_data('data/Race 1/03_Provisional Results_Race 1_Anonymized.CSV')
@@ -116,7 +139,7 @@ def select_race(racename,race_number):
             file_lap_end = load_data('data/Race 2/sonoma_lap_end_time_R2.csv')
             file_lap_start = load_data('data/Race 2/sonoma_lap_start_time_R2.csv')
             final_lap_ms = load_data('data/Race 2/sonoma_lap_time_R2.csv')
-    elif racename == "VIR":
+    elif racename == "Virginia International Raceway":
         if race_number == "Race 1":
             file_result_provisional = load_data('data/Race 1/03_Provisional Results_Race 1_Anonymized.CSV')
             file_result_provisional_class = load_data('data/Race 1/05_Provisional Results by Class_Race 1_Anonymized.CSV')
