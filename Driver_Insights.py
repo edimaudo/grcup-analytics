@@ -4,10 +4,6 @@ from data import *
 st.title(APP_NAME)
 st.header(DRIVER_HEADER)
 
-st.markdown("""
-    Provides Insights and analytics for better Driver Performance     
-    """)
-
 # side bar here
 with st.sidebar:
         racename_options = st.selectbox('Race Track',RACE_TRACK_NAME)
