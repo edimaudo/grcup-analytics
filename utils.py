@@ -41,7 +41,7 @@ App Information
 APP_NAME = 'Toyota Gazoo Racing (GR) Analytics'
 ABOUT_HEADER = 'About'
 DRIVER_HEADER = 'Driver Insights'
-PRE_RACE_HEADER = "Pre Event Analytics"
+PRE_RACE_HEADER = "Pre Event Prediction"
 POST_RACE_HEADER = 'Post Event Analytics'
 APP_FILTERS = 'Filters'
 NO_DATA_INFO = 'No data available to display based on the filters'
