@@ -185,6 +185,7 @@ def select_race(racename,race_number):
             file_result_provisional_class, 
             file_results_official,file_results_official_class, file_lap_start]
 
+
 # Convert lap times to seconds for analysis
 def laptime_to_seconds(laptime_str):
     """Convert lap time string (MM:SS.mmm) to seconds"""
