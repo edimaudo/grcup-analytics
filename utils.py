@@ -4,37 +4,23 @@ Libraries
 import streamlit as st
 import pandas as pd
 import numpy as np
-import datetime
 import os, os.path
 import warnings
 import random
 import plotly.express as px
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import pickle
 import json
 import datetime
+from datetime import datetime
 import time
 import statistics
-import matplotlib
-import ssl
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 import scipy
+from scipy.stats import linregress
 import sklearn
 from sklearn.linear_model import LinearRegression
-#import geopandas as gpd
-#import folium
-#from pycaret.classification import *
-#import pymysql
-#import xgboost
-#import pmdarima as pm
-#from google import genai
-#from dotenv import load_dotenv, dotenv_values 
-#load_dotenv() 
-
-
-
-
+from sklearn.linear_model import LinearRegression
 """
 App Information
 """
