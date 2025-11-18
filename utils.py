@@ -15,6 +15,7 @@ import json
 import datetime
 from datetime import datetime
 import time
+import matplotlib
 import statistics
 import scipy
 from scipy.stats import linregress
