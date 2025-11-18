@@ -20,7 +20,6 @@ import scipy
 from scipy.stats import linregress
 import sklearn
 from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import LinearRegression
 """
 App Information
 """
