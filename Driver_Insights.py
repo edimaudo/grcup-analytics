@@ -6,26 +6,28 @@ st.header(DRIVER_HEADER)
 
 # side bar here
 with st.sidebar:
-        racename_options = st.selectbox('Race Track',RACE_TRACK_NAME)
-        race_number_options=st.selectbox("Race Number",RACE_NUMBERS)
+        # Get data
+        racename_options = st.selectbox("Race Track", RACE_TRACK_NAME)
+        race_number_options = st.selectbox("Race #",RACE_NUMBERS)
 
-# Get data
-data_info = select_race(racename_options,race_number_options)
+        data_info = select_race(racename_options,race_number_options)
 ## output order --> file_analysis, file_best10, final_lap_ms, file_weather, file_lap_end, 
 #                   file_result_provisional,file_result_provisional_class, 
 ##                  file_results_official,file_results_official_class, file_lap_start
 
 
-analysis_df = data_info[0] ## analysis_df = pd.read_csv('23_AnalysisEnduranceWithSections_Race 1_Anonymized.CSV', sep=';')
-best_laps_df = data_info[1] ## = pd.read_csv('99_Best 10 Laps By Driver_Race 1_Anonymized.CSV', sep=';')
-lap_ms_df = data_info[2]
-weather_df = data_info[3] ##= pd.read_csv('26_Weather_Race 1_Anonymized.CSV', sep=';')
-lap_end_df = data_info[4]
-result_provisional_df = data_info[5]
-result_provisional_class_df = data_info[6]
-result_official_df = data_info[7]
-result_official_class_df = data_info[8]
-lap_start_df = data_info[9]
+        analysis_df = data_info[0] ## analysis_df = pd.read_csv('23_AnalysisEnduranceWithSections_Race 1_Anonymized.CSV', sep=';')
+        best_laps_df = data_info[1] ## = pd.read_csv('99_Best 10 Laps By Driver_Race 1_Anonymized.CSV', sep=';')
+        lap_ms_df = data_info[2]
+        weather_df = data_info[3] ##= pd.read_csv('26_Weather_Race 1_Anonymized.CSV', sep=';')
+        lap_end_df = data_info[4]
+        result_provisional_df = data_info[5]
+        result_provisional_class_df = data_info[6]
+        result_official_df = data_info[7]
+        result_official_class_df = data_info[8]
+        lap_start_df = data_info[9]
+        RACE_CAR_DRIVERS = result_official_df['NUMBER']
+        race_car_driver_options = st.selectbox("Race card drivers",RACE_CAR_DRIVERS)
 
 # Convert lap times to seconds for analysis
 def laptime_to_seconds(laptime_str):
@@ -247,8 +249,7 @@ def create_micro_sector_heatmap():
     top_15 = result_official_df.nsmallest(15, 'POSITION')['NUMBER'].tolist()
     df_gf = df_gf[df_gf['NUMBER'].isin(top_15)].copy()
 
-    # Define the micro-sectors from the original radar chart logic
-    micro_sectors_t = ['IM1a_time', 'IM1_time', 'IM2a_time', 'IM2_time', 'IM3a_time']
+    micro_sectors_t = ['IM1a_time', 'IM1_elapsed', 'IM2a_time', 'IM2_elapsed', 'IM3a_time','IM3_elapsed']
     df_dna = df_gf[['NUMBER'] + micro_sectors_t].copy()
     
     ms_cols_s = []
@@ -288,51 +289,43 @@ def create_micro_sector_heatmap():
     return fig
 
 def create_pace_ema_comparison(alpha=0.2):
-    """8. Pace Trend Comparison (EMA) - Top 5 Finishers"""
+    """8. Pace Trend Comparison (EMA) - Top 5 Finishers (Cleaned)"""
     
-    top_5 = result_official_df.nsmallest(5, 'POSITION')['NUMBER'].tolist()
+    # CHANGE 1: Select only the Top 5 finishers for a cleaner chart.
+    top_drivers = result_official_df.nsmallest(5, 'POSITION')['NUMBER'].tolist()
     
     # Filter data for top 5 drivers and clean up lap times
     df_trend = analysis_df[
-        analysis_df['NUMBER'].isin(top_5) &
+        analysis_df['NUMBER'].isin(top_drivers) & # Use new variable
         (analysis_df['FLAG_AT_FL'] == 'GF') &
-        (analysis_df['LAP_NUMBER'] > 2) & # Start after pit exit/early laps
+        (analysis_df['LAP_NUMBER'] > 2) & 
         (analysis_df['LAP_TIME_SECONDS'].notna())
     ].copy()
 
     fig = go.Figure()
     colors = px.colors.qualitative.Set1
     
-    for idx, num in enumerate(top_5):
+    for idx, num in enumerate(top_drivers): # Use new variable
         df_driver = df_trend[df_trend['NUMBER'] == num].sort_values('LAP_NUMBER')
         
         if len(df_driver) > 0:
             # Calculate Exponentially Smoothed Lap Time (EMA)
             df_driver.loc[:, 'LAP_TIME_EMA'] = df_driver['LAP_TIME_SECONDS'].ewm(alpha=alpha, adjust=False).mean()
-            
-            # 1. Plot Actual Lap Times (as light markers for context)
-            fig.add_trace(go.Scatter(
-                x=df_driver['LAP_NUMBER'],
-                y=df_driver['LAP_TIME_SECONDS'],
-                mode='markers',
-                marker=dict(color=colors[idx % len(colors)], opacity=0.3, size=4),
-                name=f"Car #{num} (Actual)",
-                showlegend=False, # Hide actual lap times from legend
-                hovertemplate="Lap %{x}<br>Actual Time: %{y:.3f}s<extra></extra>"
-            ))
+        
 
-            # 2. Plot EMA trend line (prominent line)
+            # Plot EMA trend line only (prominent line)
             fig.add_trace(go.Scatter(
                 x=df_driver['LAP_NUMBER'],
                 y=df_driver['LAP_TIME_EMA'],
                 mode='lines',
-                name=f"Car #{num} (EMA, $\\alpha={alpha}$)",
+                name=f"Car #{num}",
                 line=dict(width=3, color=colors[idx % len(colors)]),
-                hovertemplate="Lap %{x}<br>EMA Time: %{y:.3f}s<extra></extra>"
+                hovertemplate="Lap %{x}<br>Expected Lap Time: %{y:.3f}s<extra></extra>"
             ))
 
     fig.update_layout(
-        title=f"Pace Trend Comparison (Exponential Moving Average) - Top 5 Finishers",
+        # Title is now accurate for 5 drivers
+        title=f"Pace Trend Prediction - Top 5 Finishers",
         xaxis_title="Lap Number",
         yaxis_title="Lap Time (seconds)",
         height=600,
@@ -342,19 +335,261 @@ def create_pace_ema_comparison(alpha=0.2):
     
     return fig
 
+# driver info
+def create_lap_time_consistency_driver(target_driver):
+    """1. Lap Time Consistency Analysis - Driver vs Field Median (Box Plot)"""
+    # Filter out outliers (first lap, pit laps)
+    clean_data = analysis_df[
+        (analysis_df['LAP_NUMBER'] > 1) & 
+        (analysis_df['LAP_TIME_SECONDS'].notna()) &
+        (analysis_df['LAP_TIME_SECONDS'] < 150) &
+        (analysis_df['LAP_TIME_SECONDS'] > 110)
+    ].copy()
+    
+    # 1. Target Driver Data
+    driver_data = clean_data[clean_data['NUMBER'] == target_driver]['LAP_TIME_SECONDS']
+    
+    # 2. Field Data (All laps excluding the target driver for a clean field average)
+    field_data = clean_data[clean_data['NUMBER'] != target_driver]['LAP_TIME_SECONDS']
+    
+    if driver_data.empty or field_data.empty:
+        # Return a simple figure with an error message
+        return go.Figure().update_layout(title="No valid lap data for comparison.")
 
-fig1 = create_lap_time_consistency()
-st.plotly_chart(fig1)
-fig2 = create_sector_heatmap()
-st.plotly_chart(fig2)
-fig3 = create_pace_evolution()
-st.plotly_chart(fig3)
-fig4 = create_best_laps_comparison()
-st.plotly_chart(fig4)
-fig5 = create_performance_frontier()
-st.plotly_chart(fig5)
-fig6 = create_micro_sector_heatmap()
-st.plotly_chart(fig6)
-fig7 = create_pace_ema_comparison()
-st.plotly_chart(fig7)
+    fig = go.Figure()
+    
+    # Plot Target Driver Box Plot
+    fig.add_trace(go.Box(
+        y=driver_data,
+        name=f"Car #{target_driver}",
+        boxmean='sd',
+        marker_color='red'
+    ))
+    
+    # Plot Field Average Box Plot
+    fig.add_trace(go.Box(
+        y=field_data,
+        name="Field Average",
+        boxmean='sd',
+        marker_color='grey'
+    ))
+    
+    fig.update_layout(
+        title=f"Lap Time Consistency: Car #{target_driver} vs. Field Average",
+        yaxis_title="Lap Time (seconds)",
+        xaxis_title="Comparison Group",
+        height=600,
+        showlegend=True,
+        hovermode='x unified'
+    )
+    
+    return fig
+
+def create_sector_comparison_driver(target_driver):
+    """2. Average Sector Time Comparison - Driver vs Field Average (Bar Chart)"""
+    
+    # Use clean data (laps > 5)
+    clean_data = analysis_df[
+        (analysis_df['LAP_NUMBER'] > 5) & 
+        (analysis_df['LAP_TIME_SECONDS'].notna())
+    ].copy()
+    
+    sectors = ['S1_SECONDS', 'S2_SECONDS', 'S3_SECONDS']
+    
+    # 1. Calculate Field Average Sector Times
+    all_driver_avg = clean_data.groupby('NUMBER')[sectors].mean()
+    field_avg = all_driver_avg.mean().reset_index()
+    field_avg.columns = ['Sector', 'Average_Time']
+    
+    # 2. Calculate Target Driver Average Sector Times
+    driver_avg_row = clean_data[clean_data['NUMBER'] == target_driver][sectors].mean().reset_index()
+    driver_avg_row.columns = ['Sector', 'Average_Time']
+    
+    if driver_avg_row.empty:
+        return go.Figure().update_layout(title=f"No sector data for Car #{target_driver}.")
+
+    # Combine data for plotting
+    field_avg['Group'] = 'Field Average'
+    driver_avg_row['Group'] = f'Car #{target_driver}'
+    
+    df_plot = pd.concat([driver_avg_row, field_avg])
+    
+    # Create a grouped bar chart using Plotly Express
+    fig = px.bar(
+        df_plot,
+        x='Sector',
+        y='Average_Time',
+        color='Group',
+        barmode='group',
+        text='Average_Time',
+        color_discrete_map={f'Car #{target_driver}': 'red', 'Field Average': 'grey'}
+    )
+    
+    fig.update_traces(texttemplate='%{text:.3f}s', textposition='outside')
+    fig.update_layout(
+        title=f"Average Sector Times: Car #{target_driver} vs. Field Average",
+        xaxis_title="Sector",
+        yaxis_title="Average Time (seconds) - Lower is Faster",
+        height=600,
+        legend_title="Comparison",
+        uniformtext_minsize=8, uniformtext_mode='hide'
+    )
+    
+    return fig
+
+def create_pace_evolution_driver(target_driver):
+    """3. Pace Evolution - Driver Lap Times vs Field Median"""
+    
+    clean_data = analysis_df[
+        (analysis_df['LAP_NUMBER'] > 1) &
+        (analysis_df['LAP_TIME_SECONDS'].notna()) &
+        (analysis_df['LAP_TIME_SECONDS'] < 150)
+    ].copy()
+    
+    # 1. Target Driver Data
+    driver_data = clean_data[clean_data['NUMBER'] == target_driver].sort_values('LAP_NUMBER')
+    
+    # 2. Field Median Lap Time (Use median to be robust against outliers)
+    field_median_time = clean_data['LAP_TIME_SECONDS'].median()
+    
+    if driver_data.empty:
+        return go.Figure().update_layout(title=f"No lap data for Car #{target_driver}.")
+    
+    fig = go.Figure()
+    
+    # Plot Target Driver's actual lap times
+    fig.add_trace(go.Scatter(
+        x=driver_data['LAP_NUMBER'],
+        y=driver_data['LAP_TIME_SECONDS'],
+        mode='lines+markers',
+        name=f"Car #{target_driver} Lap Time",
+        line=dict(width=2, color='red'),
+        marker=dict(size=6)
+    ))
+    
+    # Plot Field Median Line
+    # Create a horizontal line spanning the driver's lap count
+    fig.add_trace(go.Scatter(
+        x=driver_data['LAP_NUMBER'], 
+        y=[field_median_time] * len(driver_data),
+        mode='lines',
+        name=f"Field Median Lap Time ({field_median_time:.3f}s)",
+        line=dict(width=3, color='grey', dash='dash')
+    ))
+    
+    fig.update_layout(
+        title=f"Pace Evolution: Car #{target_driver} vs. Field Median",
+        xaxis_title="Lap Number",
+        yaxis_title="Lap Time (seconds)",
+        height=600,
+        hovermode='x unified',
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+    )
+    
+    return fig
+
+def create_best_laps_comparison_driver(target_driver):
+    """4. Best 10 Laps Average Comparison - Driver vs Field Average (Bar Chart)"""
+    
+    # 1. Field Average of Best 10 Laps (already in seconds from data cleanup)
+    field_avg_best_10 = best_laps_df['AVERAGE'].mean()
+    
+    # 2. Target Driver's Best 10 Laps Average
+    driver_best_10 = best_laps_df[best_laps_df['NUMBER'] == target_driver]['AVERAGE']
+    
+    if driver_best_10.empty:
+        return go.Figure().update_layout(title=f"No Best 10 Laps data for Car #{target_driver}.")
+        
+    # 'AVERAGE' is a Series of length 1 containing the time in seconds
+    driver_avg = driver_best_10.iloc[0] 
+    
+    df_plot = pd.DataFrame({
+        'Group': [f"Car #{target_driver}", "Field Average"],
+        'Average_Time': [driver_avg, field_avg_best_10],
+    })
+    
+    # Create display strings for the text label
+    df_plot['Display_Time'] = df_plot['Average_Time'].apply(lambda t: f"{t:.3f}s")
+    
+    fig = go.Figure(go.Bar(
+        x=df_plot['Group'],
+        y=df_plot['Average_Time'],
+        orientation='v', 
+        marker_color=['red', 'grey'],
+        text=df_plot['Display_Time'],
+        textposition='outside'
+    ))
+    
+    fig.update_layout(
+        title=f"Average of Best 10 Laps: Car #{target_driver} vs. Field Average",
+        xaxis_title="Comparison Group",
+        yaxis_title="Average Time (seconds) - Lower is Faster",
+        height=600,
+        showlegend=False
+    )
+    
+    return fig
+
+
+tab1, tab2 = st.tabs(["Overview", "Driver Comparison"])
+
+with tab1:
+    # Lap Time Consistency
+    try:
+        fig1 = create_lap_time_consistency()
+        st.plotly_chart(fig1)
+    except Exception as e:
+        st.error(f"Error loading Lap Time Consistency: {e}")
+
+    # Best 10 Laps Average Comparison
+    try:
+        fig4 = create_best_laps_comparison()
+        st.plotly_chart(fig4)
+    except Exception as e:
+        st.error(f"Error loading Best Laps Comparison: {e}")
+
+    # Pace Evolution Throughout Race (Lap Time)
+    try:
+        fig3 = create_pace_evolution()
+        st.plotly_chart(fig3)
+    except Exception as e:
+        st.error(f"Error loading Pace Evolution: {e}")
+
+    # Sector Performance Heatmap
+    try:
+        fig2 = create_sector_heatmap()
+        st.plotly_chart(fig2)
+    except Exception as e:
+        st.error(f"Error loading Sector Heatmap: {e}") 
+
+with tab2:
+    try:
+        fig1 = create_lap_time_consistency_driver(race_car_driver_options)
+        st.plotly_chart(fig1)
+    except Exception as e:
+        st.error(f"Error loading Lap Time Consistency: {e}")
+
+    # Best 10 Laps Average Comparison (fig4)
+    try:
+        fig4 = create_best_laps_comparison_driver(race_car_driver_options)
+        st.plotly_chart(fig4)
+    except Exception as e:
+        st.error(f"Error loading Best Laps Comparison: {e}")
+
+    # Pace Evolution Throughout Race (Lap Time) (fig3)
+    try:
+        fig3 = create_pace_evolution_driver(race_car_driver_options)
+        st.plotly_chart(fig3)
+    except Exception as e:
+        st.error(f"Error loading Pace Evolution: {e}")
+    try:
+        fig2 = create_sector_comparison_driver(race_car_driver_options)
+        st.plotly_chart(fig2)
+    except Exception as e:
+        st.error(f"Error loading Sector Comparison: {e}")
+
+
+
+
+
 
