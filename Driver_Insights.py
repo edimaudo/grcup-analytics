@@ -27,7 +27,7 @@ with st.sidebar:
         result_official_class_df = data_info[8]
         lap_start_df = data_info[9]
         RACE_CAR_DRIVERS = result_official_df['NUMBER']
-        race_car_driver_options = st.selectbox("Race card drivers",RACE_CAR_DRIVERS)
+        race_car_driver_options = st.selectbox("Race card driver",RACE_CAR_DRIVERS)
 
 # Convert lap times to seconds for analysis
 def laptime_to_seconds(laptime_str):
