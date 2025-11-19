@@ -39,10 +39,10 @@ with st.sidebar:
 
 def create_fastest_lap_distribution():
     """7. Fastest Lap Distribution by Lap Number"""
-    results_df['FL_LAPNUM'] = pd.to_numeric(results_df['FL_LAPNUM'], errors='coerce')
+    result_official_df['FL_LAPNUM'] = pd.to_numeric(result_official_df['FL_LAPNUM'], errors='coerce')
     
     fig = go.Figure(go.Histogram(
-        x=results_df['FL_LAPNUM'].dropna(),
+        x=result_official_df['FL_LAPNUM'].dropna(),
         nbinsx=23,
         marker_color='indianred',
         opacity=0.75
@@ -60,7 +60,7 @@ def create_fastest_lap_distribution():
 
 def create_gap_analysis():
     """8. Gap to Winner Analysis"""
-    completed_laps = results_df[results_df['LAPS'] == 23].copy()
+    completed_laps = result_official_df[result_official_df['LAPS'] == 23].copy()
     completed_laps['GAP_SECONDS'] = completed_laps['GAP_FIRST'].apply(
         lambda x: laptime_to_seconds(x) if isinstance(x, str) and ':' in str(x) else 0
     )
@@ -88,8 +88,8 @@ def create_gap_analysis():
 
 def create_dnf_analysis():
     """9. DNF and Completion Analysis"""
-    results_df['COMPLETED'] = results_df['LAPS'].apply(lambda x: 'Completed' if x == 23 else 'DNF')
-    dnf_data = results_df[results_df['COMPLETED'] == 'DNF'].copy()
+    result_official_df['COMPLETED'] = result_official_df['LAPS'].apply(lambda x: 'Completed' if x == 23 else 'DNF')
+    dnf_data = result_official_df[result_official_df['COMPLETED'] == 'DNF'].copy()
     
     fig = go.Figure()
     
@@ -121,7 +121,7 @@ def create_performance_vs_weather():
     analysis_df['ELAPSED_SECONDS'] = analysis_df['ELAPSED'].apply(laptime_to_seconds)
     
     # Get top 5 drivers average lap times per lap
-    top_5 = results_df.nsmallest(5, 'POSITION')['NUMBER'].tolist()
+    top_5 = result_official_df.nsmallest(5, 'POSITION')['NUMBER'].tolist()
     lap_temps = []
     
     for lap_num in range(1, 24):
@@ -176,3 +176,15 @@ def create_performance_vs_weather():
     )
     
     return fig
+
+
+# Output
+
+fig1 = create_fastest_lap_distribution()
+st.plotly_chart(fig1)
+fig2 = create_gap_analysis()
+st.plotly_chart(fig2)
+fig3 = create_dnf_analysis()
+st.plotly_chart(fig3)
+fig4 = create_performance_vs_weather()
+st.plotly_chart(fig4)
