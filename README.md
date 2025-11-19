@@ -17,7 +17,8 @@ Design the solution focused on one of these areas:
 -**Post-Event Analysis**: Go beyond the final standings. Create a dashboard or report that tells the story of the race, revealing key moments and strategic decisions that led to the outcome
 -**Wildcard**: Have a brilliant idea that doesn’t fit the categories above? Surprise us! This category is for the most creative and out-of-the-box applications of racing data.
 
-[Data information](https://trddev.com/hackathon-2025/)
+[More hackathon data information](https://trddev.com/hackathon-2025/)
+
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://blank-app-qd7rpm31xpn.streamlit.app/)
 
