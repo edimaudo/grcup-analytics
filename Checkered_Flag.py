@@ -50,8 +50,6 @@ def create_fastest_lap_distribution():
     
     return fig
 
-
-
 #DNF Analysis - Bar chart of incomplete races
 def create_dnf_analysis():
     """9. DNF and Completion Analysis (Dynamic Race Distance)"""
@@ -93,9 +91,194 @@ def create_dnf_analysis():
     return fig
 
 
-fig1 = create_fastest_lap_distribution()
-st.plotly_chart(fig1)
+def create_top_finishers(N_drivers=5):
+    """Top N Race Finishers"""
+    # Filter for the Top 10 positions
+    df_top = result_official_df[result_official_df['POSITION'] <= N_drivers].copy()
+    
+    # Sort by Position so #1 is at the top (after we reverse the axis)
+    df_top = df_top.sort_values('POSITION', ascending=True)
+    
+    # Convert 'TOTAL_TIME' to seconds for the bar length logic
+    # (Uses the existing 'laptime_to_seconds' function defined in your code)
+    df_top['TOTAL_TIME_SECONDS'] = df_top['TOTAL_TIME'].apply(laptime_to_seconds)
+    
+    fig = go.Figure(go.Bar(
+        x=df_top['TOTAL_TIME_SECONDS'],
+        # Create a descriptive Y-axis label combining Position and Car Number
+        y=[f"P{pos} - Car #{num}" for pos, num in zip(df_top['POSITION'], df_top['NUMBER'])],
+        orientation='h',
+        text=df_top['TOTAL_TIME'], # Display the formatted time string on the bar
+        textposition='auto',
+        marker_color='royalblue'
+    ))
+    
+    fig.update_layout(
+        title=f"Top {N_drivers} Race Finishers",
+        xaxis_title="Total Time (Seconds)",
+        yaxis_title="Position - Car Number",
+        height=600,
+        # Reverse Y-axis so Position 1 is at the top
+        yaxis=dict(autorange="reversed")
+    )
+    
+    return fig
 
-fig3 = create_dnf_analysis()
-st.plotly_chart(fig3)
+def create_weather_timeline():
+    """5. Weather Conditions Timeline"""
+    weather_df['TIME'] = pd.to_datetime(weather_df['TIME_UTC_STR'])
+    
+    fig = make_subplots(
+        rows=3, cols=1,
+        shared_xaxes=True,
+        subplot_titles=('Temperature', 'Humidity & Pressure', 'Wind Speed'),
+        vertical_spacing=0.08
+    )
+    
+    # Temperature
+    fig.add_trace(go.Scatter(
+        x=weather_df['TIME'], y=weather_df['AIR_TEMP'],
+        name='Air Temp', line=dict(color='orange', width=2)
+    ), row=1, col=1)
+    
+    fig.add_trace(go.Scatter(
+        x=weather_df['TIME'], y=weather_df['TRACK_TEMP'],
+        name='Track Temp', line=dict(color='red', width=2)
+    ), row=1, col=1)
+    
+    # Humidity & Pressure
+    fig.add_trace(go.Scatter(
+        x=weather_df['TIME'], y=weather_df['HUMIDITY'],
+        name='Humidity', line=dict(color='blue', width=2),
+        yaxis='y3'
+    ), row=2, col=1)
+    
+    fig.add_trace(go.Scatter(
+        x=weather_df['TIME'], y=weather_df['PRESSURE'],
+        name='Pressure', line=dict(color='purple', width=2),
+        yaxis='y4'
+    ), row=2, col=1)
+    
+    # Wind Speed
+    fig.add_trace(go.Scatter(
+        x=weather_df['TIME'], y=weather_df['WIND_SPEED'],
+        name='Wind Speed', line=dict(color='green', width=2),
+        fill='tozeroy'
+    ), row=3, col=1)
+    
+    fig.update_yaxes(title_text="Temperature (°C)", row=1, col=1)
+    fig.update_yaxes(title_text="Humidity (%)", row=2, col=1)
+    fig.update_yaxes(title_text="Wind Speed (km/h)", row=3, col=1)
+    fig.update_xaxes(title_text="Time", row=3, col=1)
+    
+    fig.update_layout(
+        height=900,
+        title_text="Weather Conditions During Race",
+        showlegend=True,
+        hovermode='x unified'
+    )
+    
+    return fig
+
+def create_wind_polar():
+    """6. Wind Speed & Direction Polar Plot"""
+    fig = go.Figure()
+    
+    fig.add_trace(go.Scatterpolar(
+        r=weather_df['WIND_SPEED'],
+        theta=weather_df['WIND_DIRECTION'],
+        mode='markers',
+        marker=dict(
+            size=10,
+            color=weather_df['WIND_SPEED'],
+            colorscale='Viridis',
+            showscale=True,
+            colorbar=dict(title="Wind Speed<br>(km/h)")
+        ),
+        text=weather_df['TIME_UTC_STR'],
+        hovertemplate='Wind Speed: %{r:.2f} km/h<br>Direction: %{theta}°<br>%{text}<extra></extra>'
+    ))
+    
+    fig.update_layout(
+        title="Wind Speed and Direction Pattern",
+        polar=dict(
+            radialaxis=dict(title="Wind Speed (km/h)", angle=90),
+            angularaxis=dict(direction="clockwise", rotation=90)
+        ),
+        height=700
+    )
+    
+    return fig
+
+
+def _prepare_weather_lap_data():
+    """Helper: Prepares and merges lap and weather data for models (Viz 2 and Viz 4 Residuals)."""
+    
+    # 1. Prepare average weather data (Track Temp)
+    df_weather_clean = weather_df[['TIME_UTC_STR', 'TRACK_TEMP']].dropna().copy()
+    # Assuming 'TIME_UTC_STR' is parsable to extract HH:MM for merge
+    try:
+        df_weather_clean['TIME_KEY'] = df_weather_clean['TIME_UTC_STR'].apply(
+            lambda x: datetime.strptime(str(x).split(' ')[1], '%H:%M:%S').strftime('%H:%M')
+        )
+    except:
+        # Fallback for different time formats
+        df_weather_clean['TIME_KEY'] = df_weather_clean['TIME_UTC_STR'].apply(
+            lambda x: str(x).split(' ')[-1][:5] if pd.notna(x) else np.nan
+        )
+
+    df_avg_weather = df_weather_clean.groupby('TIME_KEY')['TRACK_TEMP'].mean().reset_index()
+
+    # 2. Prepare lap data
+    df_lap_data = analysis_df[['NUMBER', 'LAP_NUMBER', 'FLAG_AT_FL', 'HOUR', 'LAP_TIME_SECONDS']].copy()
+    df_lap_data = df_lap_data.rename(columns={'LAP_TIME_SECONDS': 'LAP_TIME_S'})
+    
+    try:
+        df_lap_data.loc[:, 'HOUR_KEY'] = df_lap_data['HOUR'].apply(
+            lambda x: datetime.strptime(str(x).split(' ')[-1].split('.')[0], '%H:%M:%S').strftime('%H:%M') if pd.notna(x) else np.nan
+        )
+    except:
+        df_lap_data.loc[:, 'HOUR_KEY'] = df_lap_data['HOUR'].apply(
+            lambda x: str(x).split(' ')[-1][:5] if pd.notna(x) else np.nan
+        )
+
+    # 3. Final Merge and Filter
+    df_model_data = pd.merge(df_lap_data, df_avg_weather, left_on='HOUR_KEY', right_on='TIME_KEY', how='left')
+    df_model_data = df_model_data[
+        (df_model_data['FLAG_AT_FL'] == 'GF') & 
+        (df_model_data['LAP_NUMBER'] > 2)
+    ].dropna(subset=['LAP_TIME_S', 'TRACK_TEMP']).copy()
+    
+    return df_model_data
+
+try:
+    fig1 = create_weather_timeline()
+    st.plotly_chart(fig1)
+except Exception as e:
+    st.error(f"Error loading Weather Conditions Timeline: {e}")
+
+# Wind Polars
+try:
+    fig2 = create_wind_polar()
+    st.plotly_chart(fig2)
+except Exception as e:
+    st.error(f"Error loading Wind Polar Plot: {e}")
+
+try:
+    fig3 = create_top_finishers(N_drivers=5)
+    st.plotly_chart(fig3)
+except Exception as e:
+    st.error(f"Error loading top finishers: {e}")
+
+try:
+    fig4 = create_fastest_lap_distribution()
+    st.plotly_chart(fig4)
+except Exception as e:
+    st.error(f"Error loading fastest lap: {e}")
+
+try:
+    fig5 = create_dnf_analysis()
+    st.plotly_chart(fig5)
+except Exception as e:
+    st.error(f"Error loading DNF analysis: {e}")
 

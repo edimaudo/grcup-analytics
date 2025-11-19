@@ -32,7 +32,7 @@ analysis_df['S2_SECONDS'] = analysis_df['S2_SECONDS'].astype(float)
 analysis_df['S3_SECONDS'] = analysis_df['S3_SECONDS'].astype(float)
 best_laps_df['AVERAGE'] = best_laps_df['AVERAGE'].apply(laptime_to_seconds)
 
-def create_lap_time_consistency():
+def create_lap_time_consistency(N_drivers=5):
     """Lap Time Consistency Analysis"""
     # Filter out outliers (first lap, pit laps)
     clean_data = analysis_df[
@@ -42,13 +42,13 @@ def create_lap_time_consistency():
         (analysis_df['LAP_TIME_SECONDS'] > 110)
     ].copy()
     
-    # Get top 10 finishers
-    top_10 = result_official_df.nsmallest(10, 'POSITION')['NUMBER'].tolist()
-    clean_data = clean_data[clean_data['NUMBER'].isin(top_10)]
+    # Get top N finishers
+    top_N = result_official_df.nsmallest(N_drivers, 'POSITION')['NUMBER'].tolist()
+    clean_data = clean_data[clean_data['NUMBER'].isin(top_N)]
     
     fig = go.Figure()
     
-    for num in top_10:
+    for num in top_N:
         driver_data = clean_data[clean_data['NUMBER'] == num]
         if len(driver_data) > 0:  # Check if there's data
             fig.add_trace(go.Box(
@@ -58,7 +58,7 @@ def create_lap_time_consistency():
             ))
     
     fig.update_layout(
-        title="Lap Time Consistency - Top 10 Finishers",
+        title=f"Lap Time Consistency - Top {N_drivers} Finishers",
         yaxis_title="Lap Time (seconds)",
         xaxis_title="Car Number",
         height=600,
@@ -68,13 +68,13 @@ def create_lap_time_consistency():
     
     return fig
 
-def create_sector_heatmap():
+def create_sector_heatmap(N_drivers=5):
     """Sector Performance Heatmap"""
-    # Calculate average sector times for top 15
-    top_15 = result_official_df.nsmallest(15, 'POSITION')['NUMBER'].tolist()
+    # Calculate average sector times for top N
+    top_n = result_official_df.nsmallest(N_drivers, 'POSITION')['NUMBER'].tolist()
     clean_data = analysis_df[
         (analysis_df['LAP_NUMBER'] > 5) & 
-        (analysis_df['NUMBER'].isin(top_15))
+        (analysis_df['NUMBER'].isin(top_n))
     ].copy()
     
     sector_avg = clean_data.groupby('NUMBER').agg({
@@ -95,7 +95,7 @@ def create_sector_heatmap():
     ))
     
     fig.update_layout(
-        title="Average Sector Times - Top 15 Drivers",
+        title=f"Average Sector Times - Top {N_drivers} Drivers",
         xaxis_title="Sector",
         yaxis_title="Driver",
         height=700
@@ -103,15 +103,15 @@ def create_sector_heatmap():
     
     return fig
 
-def create_pace_evolution():
+def create_pace_evolution(N_drivers=5):
     """Pace Evolution Throughout Race"""
-    top_5 = result_official_df.nsmallest(5, 'POSITION')['NUMBER'].tolist()
+    top_n = result_official_df.nsmallest(N_drivers, 'POSITION')['NUMBER'].tolist()
     
     fig = go.Figure()
     
     colors = px.colors.qualitative.Set1
     
-    for idx, num in enumerate(top_5):
+    for idx, num in enumerate(top_n):
         driver_data = analysis_df[
             (analysis_df['NUMBER'] == num) & 
             (analysis_df['LAP_NUMBER'] > 1) &
@@ -128,7 +128,7 @@ def create_pace_evolution():
         ))
     
     fig.update_layout(
-        title="Lap Time Evolution - Top 5 Finishers",
+        title=f"Lap Time Evolution - Top {N_drivers} Finishers",
         xaxis_title="Lap Number",
         yaxis_title="Lap Time (seconds)",
         height=600,
@@ -138,30 +138,30 @@ def create_pace_evolution():
     
     return fig
 
-def create_best_laps_comparison():
+def create_best_laps_comparison(N_drivers=5):
     """Best 10 Laps Average Comparison (Horizontal Bar Chart)"""
-    top_15 = best_laps_df.nsmallest(15, 'AVERAGE')
+    top_n = best_laps_df.nsmallest(N_drivers, 'AVERAGE')
     
     # 1. FIX: Reverse the order of the DataFrame so the fastest car (smallest average)
     #    appears at the top of the horizontal bar chart.
-    top_15 = top_15.iloc[::-1] 
+    top_n = top_n.iloc[::-1] 
     
     # Calculate time in seconds for plotting
-    average_seconds = top_15['AVERAGE'].apply(laptime_to_seconds)
+    average_seconds = top_n['AVERAGE'].apply(laptime_to_seconds)
     
     fig = go.Figure(go.Bar(
         # Y-axis (vertical) is Driver number
-        y=[f"Car #{num}" for num in top_15['NUMBER']],
+        y=[f"Car #{num}" for num in top_n['NUMBER']],
         # X-axis (horizontal) is Average time in seconds
         x=average_seconds,
         orientation='h', 
         # Display the original time string on the bars
-        text=top_15['AVERAGE'],
+        text=top_n['AVERAGE'],
         textposition='outside'
     ))
     
     fig.update_layout(
-        title="Average of Best 10 Laps - Top 15 Drivers",
+        title=f"Average of Best 10 Laps - Top {N_drivers} Drivers",
         # X-AXIS FIX: Reverse the X-axis so that smaller/faster times are visually to the right
         xaxis_title="Average Time (seconds) - Lower is Faster",
         yaxis_title="Driver",
@@ -517,28 +517,28 @@ tab1, tab2 = st.tabs(["Overview", "Driver Comparison"])
 with tab1:
     # Lap Time Consistency
     try:
-        fig1 = create_lap_time_consistency()
+        fig1 = create_lap_time_consistency(N_drivers=5)
         st.plotly_chart(fig1)
     except Exception as e:
         st.error(f"Error loading Lap Time Consistency: {e}")
 
     # Best 10 Laps Average Comparison
     try:
-        fig4 = create_best_laps_comparison()
+        fig4 = create_best_laps_comparison(N_drivers=5)
         st.plotly_chart(fig4)
     except Exception as e:
         st.error(f"Error loading Best Laps Comparison: {e}")
 
     # Pace Evolution Throughout Race (Lap Time)
     try:
-        fig3 = create_pace_evolution()
+        fig3 = create_pace_evolution(N_drivers=5)
         st.plotly_chart(fig3)
     except Exception as e:
         st.error(f"Error loading Pace Evolution: {e}")
 
     # Sector Performance Heatmap
     try:
-        fig2 = create_sector_heatmap()
+        fig2 = create_sector_heatmap(N_drivers=5)
         st.plotly_chart(fig2)
     except Exception as e:
         st.error(f"Error loading Sector Heatmap: {e}") 
