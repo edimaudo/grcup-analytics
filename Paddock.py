@@ -4,22 +4,17 @@ from data import *
 st.title(APP_NAME)
 st.header(PRE_RACE_HEADER)
 
-
 # side bar here
 with st.sidebar:
         racename_options = st.selectbox('Race Track',RACE_TRACK_NAME)
         race_number_options=st.selectbox("Race Number",RACE_NUMBERS)
         # Get data
         data_info = select_race(racename_options,race_number_options)
-        ## output order --> file_analysis, file_best10, final_lap_ms, file_weather, file_lap_end, 
-        #                   file_result_provisional,file_result_provisional_class, 
-        ##                  file_results_official,file_results_official_class, file_lap_start
 
-
-        analysis_df = data_info[0] ## analysis_df = pd.read_csv('23_AnalysisEnduranceWithSections_Race 1_Anonymized.CSV', sep=';')
-        best_laps_df = data_info[1] ## = pd.read_csv('99_Best 10 Laps By Driver_Race 1_Anonymized.CSV', sep=';')
+        analysis_df = data_info[0] 
+        best_laps_df = data_info[1] 
         lap_ms_df = data_info[2]
-        weather_df = data_info[3] ##= pd.read_csv('26_Weather_Race 1_Anonymized.CSV', sep=';')
+        weather_df = data_info[3] 
         lap_end_df = data_info[4]
         result_provisional_df = data_info[5]
         result_provisional_class_df = data_info[6]
@@ -28,8 +23,6 @@ with st.sidebar:
         lap_start_df = data_info[9]
         RACE_CAR_DRIVERS = result_official_df['NUMBER']
         race_car_driver_options = st.selectbox("Race card driver",RACE_CAR_DRIVERS)
-
-
 
 # Data clean up
 analysis_df['LAP_TIME_SECONDS'] = analysis_df['LAP_TIME'].apply(laptime_to_seconds)
@@ -124,7 +117,6 @@ def create_wind_polar():
     
     return fig
 
-# Assuming analysis_df, best_laps_df, weather_df, and laptime_to_seconds are available globally.
 
 def _prepare_weather_lap_data():
     """Helper: Prepares and merges lap and weather data for models (Viz 2 and Viz 4 Residuals)."""
@@ -148,7 +140,6 @@ def _prepare_weather_lap_data():
     df_lap_data = analysis_df[['NUMBER', 'LAP_NUMBER', 'FLAG_AT_FL', 'HOUR', 'LAP_TIME_SECONDS']].copy()
     df_lap_data = df_lap_data.rename(columns={'LAP_TIME_SECONDS': 'LAP_TIME_S'})
     
-    # Extract HOUR key for merge
     try:
         df_lap_data.loc[:, 'HOUR_KEY'] = df_lap_data['HOUR'].apply(
             lambda x: datetime.strptime(str(x).split(' ')[-1].split('.')[0], '%H:%M:%S').strftime('%H:%M') if pd.notna(x) else np.nan
@@ -167,12 +158,8 @@ def _prepare_weather_lap_data():
     
     return df_model_data
 
-# Simulation
 def create_pace_degradation_comparison(N_drivers=5):
-    """Viz 1: Pace Degradation Model - Lap Time vs Lap Number (Top N Comparison)
-    
-    CLEANED: Only shows the linear degradation trend line to reduce clutter.
-    """
+    """Pace Degradation Model - Lap Time vs Lap Number (Top N Comparison)"""
     
     # Get top N drivers to focus the comparison
     top_drivers = result_official_df.nsmallest(N_drivers, 'POSITION')['NUMBER'].tolist()
@@ -217,9 +204,8 @@ def create_pace_degradation_comparison(N_drivers=5):
     )
     return fig
 
-# The "Glass Box" Simulation Engine 
 def create_coeff_field_rank():
-    """Viz 4 (Part 1): Coefficient Field Rank - Tire Degradation Rate (Horizontal Bar Chart)"""
+    """Tire Degradation Rate (Horizontal Bar Chart)"""
     
     deg_coefficients = {}
     df_pace_gf = analysis_df[(analysis_df['FLAG_AT_FL'] == 'GF') & (analysis_df['LAP_NUMBER'] > 2)].dropna(subset=['LAP_TIME_SECONDS']).copy()
@@ -335,7 +321,7 @@ def create_pace_degradation_comparison_driver(driver_number):
 
 
 def create_coeff_field_rank_driver(driver_number):
-    """Viz 4 (Part 1): Coefficient Field Rank - Driver vs. Average Degradation Rate.
+    """Driver vs. Average Degradation Rate.
     
     Highlights the target driver and adds a vertical line for the field average degradation.
     """
@@ -404,10 +390,6 @@ def create_coeff_field_rank_driver(driver_number):
     )
     return fig
 
-
-
-
-
 # Output
 tab1, tab2 = st.tabs(["Overview", "Driver Comparison"])
 with tab1:
@@ -439,14 +421,12 @@ with tab1:
         st.error(f"Error loading Degradation Rank: {e}")
 
 with tab2:        
-    # VIZ 1: Pace Degradation Model for particular driver
     try:
         fig_deg_driver = create_pace_degradation_comparison_driver(race_car_driver_options)
         st.plotly_chart(fig_deg_driver)
     except Exception as e:
         st.error(f"Error loading Pace Degradation Model: {e}")
 
-    # Tire degradation for particular driver
     try:
         fig_rank_driver = create_coeff_field_rank_driver(race_car_driver_options)
         st.plotly_chart(fig_rank_driver)

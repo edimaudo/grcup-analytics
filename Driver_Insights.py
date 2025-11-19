@@ -11,15 +11,11 @@ with st.sidebar:
         race_number_options = st.selectbox("Race #",RACE_NUMBERS)
 
         data_info = select_race(racename_options,race_number_options)
-## output order --> file_analysis, file_best10, final_lap_ms, file_weather, file_lap_end, 
-#                   file_result_provisional,file_result_provisional_class, 
-##                  file_results_official,file_results_official_class, file_lap_start
 
-
-        analysis_df = data_info[0] ## analysis_df = pd.read_csv('23_AnalysisEnduranceWithSections_Race 1_Anonymized.CSV', sep=';')
-        best_laps_df = data_info[1] ## = pd.read_csv('99_Best 10 Laps By Driver_Race 1_Anonymized.CSV', sep=';')
+        analysis_df = data_info[0] 
+        best_laps_df = data_info[1] 
         lap_ms_df = data_info[2]
-        weather_df = data_info[3] ##= pd.read_csv('26_Weather_Race 1_Anonymized.CSV', sep=';')
+        weather_df = data_info[3] 
         lap_end_df = data_info[4]
         result_provisional_df = data_info[5]
         result_provisional_class_df = data_info[6]
@@ -37,7 +33,7 @@ analysis_df['S3_SECONDS'] = analysis_df['S3_SECONDS'].astype(float)
 best_laps_df['AVERAGE'] = best_laps_df['AVERAGE'].apply(laptime_to_seconds)
 
 def create_lap_time_consistency():
-    """1. Lap Time Consistency Analysis"""
+    """Lap Time Consistency Analysis"""
     # Filter out outliers (first lap, pit laps)
     clean_data = analysis_df[
         (analysis_df['LAP_NUMBER'] > 1) & 
@@ -73,7 +69,7 @@ def create_lap_time_consistency():
     return fig
 
 def create_sector_heatmap():
-    """2. Sector Performance Heatmap"""
+    """Sector Performance Heatmap"""
     # Calculate average sector times for top 15
     top_15 = result_official_df.nsmallest(15, 'POSITION')['NUMBER'].tolist()
     clean_data = analysis_df[
@@ -108,7 +104,7 @@ def create_sector_heatmap():
     return fig
 
 def create_pace_evolution():
-    """3. Pace Evolution Throughout Race"""
+    """Pace Evolution Throughout Race"""
     top_5 = result_official_df.nsmallest(5, 'POSITION')['NUMBER'].tolist()
     
     fig = go.Figure()
@@ -143,7 +139,7 @@ def create_pace_evolution():
     return fig
 
 def create_best_laps_comparison():
-    """4. Best 10 Laps Average Comparison (Horizontal Bar Chart)"""
+    """Best 10 Laps Average Comparison (Horizontal Bar Chart)"""
     top_15 = best_laps_df.nsmallest(15, 'AVERAGE')
     
     # 1. FIX: Reverse the order of the DataFrame so the fastest car (smallest average)
@@ -177,7 +173,7 @@ def create_best_laps_comparison():
     return fig
 
 def create_performance_frontier():
-    """5. Driver DNA - Performance Frontier (Corner Entry vs. Exit)"""
+    """Driver DNA - Performance Frontier (Corner Entry vs. Exit)"""
     # Filter for 'Good/Fast' laps (GF)
     df_gf = analysis_df[analysis_df['FLAG_AT_FL'] == 'GF'].copy()
 
@@ -227,7 +223,7 @@ def create_performance_frontier():
     return fig
 
 def create_micro_sector_heatmap():
-    """7. Average Micro-Sector Performance Heatmap (Cornering DNA)"""
+    """Average Micro-Sector Performance Heatmap (Cornering DNA)"""
     df_gf = analysis_df[analysis_df['FLAG_AT_FL'] == 'GF'].copy()
     
     # Use top 15 drivers, consistent with the existing sector heatmap
@@ -274,7 +270,7 @@ def create_micro_sector_heatmap():
     return fig
 
 def create_pace_ema_comparison(alpha=0.2):
-    """8. Pace Trend Comparison (EMA) - Top 5 Finishers (Cleaned)"""
+    """Pace Trend Comparison (EMA) - Top 5 Finishers (Cleaned)"""
     
     # CHANGE 1: Select only the Top 5 finishers for a cleaner chart.
     top_drivers = result_official_df.nsmallest(5, 'POSITION')['NUMBER'].tolist()
@@ -322,7 +318,7 @@ def create_pace_ema_comparison(alpha=0.2):
 
 # driver info
 def create_lap_time_consistency_driver(target_driver):
-    """1. Lap Time Consistency Analysis - Driver vs Field Median (Box Plot)"""
+    """Lap Time Consistency Analysis - Driver vs Field Median (Box Plot)"""
     # Filter out outliers (first lap, pit laps)
     clean_data = analysis_df[
         (analysis_df['LAP_NUMBER'] > 1) & 
@@ -371,7 +367,7 @@ def create_lap_time_consistency_driver(target_driver):
     return fig
 
 def create_sector_comparison_driver(target_driver):
-    """2. Average Sector Time Comparison - Driver vs Field Average (Bar Chart)"""
+    """Average Sector Time Comparison - Driver vs Field Average (Bar Chart)"""
     
     # Use clean data (laps > 5)
     clean_data = analysis_df[
@@ -423,7 +419,7 @@ def create_sector_comparison_driver(target_driver):
     return fig
 
 def create_pace_evolution_driver(target_driver):
-    """3. Pace Evolution - Driver Lap Times vs Field Median"""
+    """Pace Evolution - Driver Lap Times vs Field Median"""
     
     clean_data = analysis_df[
         (analysis_df['LAP_NUMBER'] > 1) &
@@ -474,7 +470,7 @@ def create_pace_evolution_driver(target_driver):
     return fig
 
 def create_best_laps_comparison_driver(target_driver):
-    """4. Best 10 Laps Average Comparison - Driver vs Field Average (Bar Chart)"""
+    """Best 10 Laps Average Comparison - Driver vs Field Average (Bar Chart)"""
     
     # 1. Field Average of Best 10 Laps (already in seconds from data cleanup)
     field_avg_best_10 = best_laps_df['AVERAGE'].mean()
