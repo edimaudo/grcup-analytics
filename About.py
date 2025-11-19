@@ -25,13 +25,5 @@ Design the solution focused on one of these areas:
 
 - **Wildcard**: Have a brilliant idea that doesn’t fit the categories above? Surprise us! This category is for the most creative and out-of-the-box applications of racing data.
 
-### JUDGING CRITERIA
-- **Application of the TRD Datasets**:Does the project apply the datasets in an effective way, fitting with the categories? Does the project showcase the datasets uniquely?
-
-- **Design**:Is the user experience and design of the project well thought out? Is there a balanced blend of frontend and backend in the software?
-
-- **Potential Impact**:How big of an impact could the project have on the Toyota Racing community? How big of an impact could it have beyond the target community?
-
-- **Quality of the Idea**:How creative and unique is the project? Does the concept exist already? If so, how much does the project improve on it?
-    """
+"""
 )
