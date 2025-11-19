@@ -4,36 +4,38 @@ from data import *
 st.title(APP_NAME)
 st.header(POST_RACE_HEADER)
 
-#Fastest Lap Distribution - Histogram showing when drivers set their fastest laps
-#Gap Analysis - Waterfall chart showing time gaps between positions
-#DNF Analysis - Bar chart of incomplete races
-#Performance vs Weather - Scatter plot correlating lap times with track temperature
+
 
 with st.sidebar:
         racename_options = st.selectbox('Race Track',RACE_TRACK_NAME)
         race_number_options=st.selectbox("Race Number",RACE_NUMBERS)
 
-# Get data
-data_info = select_race(racename_options,race_number_options)
-## output order --> file_analysis, file_best10, final_lap_ms, file_weather, file_lap_end, 
-#                   file_result_provisional,file_result_provisional_class, 
-##                  file_results_official,file_results_official_class, file_lap_start
+        # Get data
+        data_info = select_race(racename_options,race_number_options)
+        ## output order --> file_analysis, file_best10, final_lap_ms, file_weather, file_lap_end, 
+        #                   file_result_provisional,file_result_provisional_class, 
+        ##                  file_results_official,file_results_official_class, file_lap_start
 
 
-analysis_df = data_info[0] ## analysis_df = pd.read_csv('23_AnalysisEnduranceWithSections_Race 1_Anonymized.CSV', sep=';')
-best_laps_df = data_info[1] ## = pd.read_csv('99_Best 10 Laps By Driver_Race 1_Anonymized.CSV', sep=';')
-lap_ms_df = data_info[2]
-weather_df = data_info[3] ##= pd.read_csv('26_Weather_Race 1_Anonymized.CSV', sep=';')
-lap_end_df = data_info[4]
-result_provisional_df = data_info[5]
-result_provisional_class_df = data_info[6]
-result_official_df = data_info[7]
-result_official_class_df = data_info[8]
-lap_start_df = data_info[9]
+        analysis_df = data_info[0] ## analysis_df = pd.read_csv('23_AnalysisEnduranceWithSections_Race 1_Anonymized.CSV', sep=';')
+        best_laps_df = data_info[1] ## = pd.read_csv('99_Best 10 Laps By Driver_Race 1_Anonymized.CSV', sep=';')
+        lap_ms_df = data_info[2]
+        weather_df = data_info[3] ##= pd.read_csv('26_Weather_Race 1_Anonymized.CSV', sep=';')
+        lap_end_df = data_info[4]
+        result_provisional_df = data_info[5]
+        result_provisional_class_df = data_info[6]
+        result_official_df = data_info[7]
+        result_official_class_df = data_info[8]
+        lap_start_df = data_info[9]
 
 # ============================================================================
 # POST-EVENT ANALYSIS VISUALIZATIONS
 # ============================================================================
+
+#Fastest Lap Distribution - Histogram showing when drivers set their fastest laps
+#Gap Analysis - Waterfall chart showing time gaps between positions
+#DNF Analysis - Bar chart of incomplete races
+#Performance vs Weather - Scatter plot correlating lap times with track temperature
 
 def create_fastest_lap_distribution():
     """7. Fastest Lap Distribution by Lap Number"""
