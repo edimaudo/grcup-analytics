@@ -180,6 +180,7 @@ def _prepare_weather_lap_data():
     
     return df_model_data
 
+# Simulation
 def create_pace_degradation_comparison(N_drivers=5):
     """Viz 1: Pace Degradation Model - Lap Time vs Lap Number (Top N Comparison)
     
@@ -229,7 +230,7 @@ def create_pace_degradation_comparison(N_drivers=5):
     )
     return fig
 
-
+# The "Glass Box" Simulation Engine 
 def create_coeff_field_rank():
     """Viz 4 (Part 1): Coefficient Field Rank - Tire Degradation Rate (Horizontal Bar Chart)"""
     
