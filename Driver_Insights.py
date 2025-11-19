@@ -29,21 +29,6 @@ with st.sidebar:
         RACE_CAR_DRIVERS = result_official_df['NUMBER']
         race_car_driver_options = st.selectbox("Race card driver",RACE_CAR_DRIVERS)
 
-# Convert lap times to seconds for analysis
-def laptime_to_seconds(laptime_str):
-    """Convert lap time string (MM:SS.mmm) to seconds"""
-    try:
-        if pd.isna(laptime_str) or laptime_str == '0' or laptime_str == '':
-            return None
-        parts = str(laptime_str).split(':')
-        if len(parts) == 2:
-            minutes = int(parts[0])
-            seconds = float(parts[1])
-            return minutes * 60 + seconds
-        return float(laptime_str)
-    except:
-        return None
-
 # Data clean up
 analysis_df['LAP_TIME_SECONDS'] = analysis_df['LAP_TIME'].apply(laptime_to_seconds)
 analysis_df['S1_SECONDS'] = analysis_df['S1_SECONDS'].astype(float)
