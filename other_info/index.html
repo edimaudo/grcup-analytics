@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GR Cup Analytics Project Deck</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Race Theme Colors */
+        :root {
+            --color-primary: #EF4444; /* Racing Red */
+            --color-secondary: #FACC15; /* Bright Yellow (Used only for tech box accent) */
+            --color-dark: #111827; /* Dark Slate/Black */
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-dark);
+            color: white;
+            transition: all 0.5s ease-in-out;
+            user-select: none;
+        }
+
+        .slide-container {
+            height: calc(100vh - 80px); /* Full height minus footer */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            animation: fadeIn 0.8s;
+        }
+
+        .slide-content {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .race-accent {
+            color: var(--color-primary);
+        }
+
+        .btn-nav {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        .btn-nav:hover:not(:disabled) {
+            background-color: #DC2626; /* Darker Red */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        .btn-nav:disabled {
+            background-color: #374151; /* Greyed out */
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Highlight box for code/tech: Now uses gray border instead of yellow */
+        .tech-box {
+            background-color: #1F2937;
+            border-left: 5px solid #4B5563; /* Neutral gray border */
+            text-align: left;
+            padding: 1.5rem;
+            margin: 1.5rem auto;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Slide Viewport -->
+    <div id="slide-viewport" class="slide-container">
+        <!-- Content will be injected here -->
+    </div>
+
+    <!-- Navigation Footer (Slide counter removed) -->
+    <footer class="fixed bottom-0 left-0 right-0 p-4 bg-gray-900 border-t border-gray-700 flex justify-between items-center z-10">
+        <button id="prev-btn" class="btn-nav" onclick="prevSlide()" disabled>Previous</button>
+        <!-- slide-counter span removed here -->
+        <button id="next-btn" class="btn-nav" onclick="nextSlide()">Next</button>
+    </footer>
+
+    <script>
+        let currentSlideIndex = 0;
+        const slides = [
+            // Slide 1: Title Page
+            {
+                title: "",
+                subtitle: "",
+                content: `<h1 class="text-7xl font-extrabold race-accent mb-4 tracking-tight">GR CUP ANALYTICS</h1>
+                          <p class="text-3xl text-gray-100 font-light mt-4">Transforming Raw Data into Winning Strategy</p>
+                          `
+            },
+            // Slide 2: About Page - Centralized Objectives
+            {
+                title: "Find the Edge",
+                subtitle: "",
+                content: `<div class="text-left max-w-xl mx-auto space-y-6 text-gray-100">
+                            <p class="text-lg text-center">Raw GR Cup race data is complex. The goal was to process, analyze, and visualize GR Cup data to find insights into these key areas</p>
+                            
+                            <div class="space-y-3 font-semibold text-center border-t border-b border-gray-700 py-4">
+                                <p class="text-xl race-accent">1. Driver Performance</p>
+                                <p class="text-xl race-accent mt-4">2. Pre Race Prediction</p>
+                                <p class="text-xl race-accent mt-4">3. Post Event Analysis</p>
+                                
+                            </div>
+
+                            
+                          </div>`
+            },
+
+            // Slide 4: How it Was Built (Tech Stack) 
+            {
+                title: "How It Was Built",
+                subtitle: "",
+                content: `<div class="tech-box mx-auto max-w-xl text-gray-100">
+                            <ul class="list-disc list-inside space-y-2 text-lg">
+                                <li>Data Source: GR Cup Data from multiple races</li>
+                                <li>Analysis: Python Data Analysis Libraries (pandas, numpy, scikit)</li>
+                                <li>Visualization: Plotly Library</li>
+                                <li>Deployment: Streamlit</li>
+                            </ul>
+                          </div>
+
+                          `
+            },
+            // Slide 5: Demo Highlights
+            {
+                title: "Demo",
+                subtitle: "",
+                content: `<div class="text-left max-w-xl mx-auto space-y-4 text-gray-100">
+ 
+                          </div>`
+            },
+            // Slide 6: Next Steps
+            {
+                title: "Next Steps",
+                subtitle: "",
+                content: `<div class="text-left max-w-xl mx-auto space-y-4 text-gray-100">
+                            <ul class="list-disc list-inside ml-4 space-y-2 text-lg">
+                                <li><span class="race-accent font-bold">Improved Data</span>: Work to ensure data is consistent across GR Cup races</li>
+                                <li><span class="race-accent font-bold">Predictive Modeling</span>: Improve modeliing using more sophisticated algorithms.</li>
+                                <li><span class="race-accent font-bold">Multi-Race Comparison</span>: Improve the application to provide the ability to analyze results and metrics across races.</li>
+                                
+                            </ul>
+                          </div>
+                          `
+            }
+        ];
+
+        const slideViewport = document.getElementById('slide-viewport');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        // slideCounter is no longer referenced
+
+        function renderSlide() {
+            const slide = slides[currentSlideIndex];
+
+            // Update content with a fade effect
+            slideViewport.innerHTML = `
+                <div class="slide-content">
+                    <h2 class="text-5xl font-extrabold mb-2">${slide.title}</h2>
+                    <h3 class="text-2xl mb-8 text-gray-400 font-medium">${slide.subtitle || ''}</h3>
+                    ${slide.content}
+                </div>
+            `;
+            
+            // Re-enable the animation
+            slideViewport.style.animation = 'none';
+            void slideViewport.offsetWidth; // Trigger reflow
+            slideViewport.style.animation = 'fadeIn 0.8s';
+
+
+            // Update buttons
+            prevBtn.disabled = currentSlideIndex === 0;
+            nextBtn.disabled = currentSlideIndex === slides.length - 1;
+            
+            // Slide counter update logic removed
+        }
+
+        function nextSlide() {
+            if (currentSlideIndex < slides.length - 1) {
+                currentSlideIndex++;
+                renderSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlideIndex > 0) {
+                currentSlideIndex--;
+                renderSlide();
+            }
+        }
+
+        // Initial render call made directly
+        renderSlide();
+    </script>
+
+</body>
+</html>
